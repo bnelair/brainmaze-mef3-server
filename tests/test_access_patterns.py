@@ -18,9 +18,12 @@ def backward_sequential_access(file_manager, file_path, num_chunks=10):
         _ = list(file_manager.get_signal_segment(file_path, i))
 
 
-def random_access(file_manager, file_path):
+def random_access(file_manager, file_path, num_chunks=10):
     """Access chunks in random order"""
-    indices = [0, 5, 2, 8, 1, 9, 3, 7, 4, 6]
+    # Use a fixed seed for reproducibility, but vary the pattern
+    import random
+    indices = list(range(num_chunks))
+    random.Random(42).shuffle(indices)
     for i in indices:
         _ = list(file_manager.get_signal_segment(file_path, i))
 
@@ -82,7 +85,7 @@ def test_random_access_with_prefetch(benchmark, mef3_file):
     fm = FileManager(n_prefetch=3, cache_capacity_multiplier=5, max_workers=4)
     fm.open_file(mef3_file)
     fm.set_signal_segment_size(mef3_file, seconds=60)
-    benchmark(random_access, fm, mef3_file)
+    benchmark(random_access, fm, mef3_file, 10)
     fm.shutdown()
 
 
@@ -92,7 +95,7 @@ def test_random_access_no_prefetch(benchmark, mef3_file):
     fm = FileManager(n_prefetch=0, cache_capacity_multiplier=0)
     fm.open_file(mef3_file)
     fm.set_signal_segment_size(mef3_file, seconds=60)
-    benchmark(random_access, fm, mef3_file)
+    benchmark(random_access, fm, mef3_file, 10)
     fm.shutdown()
 
 

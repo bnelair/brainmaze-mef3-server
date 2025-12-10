@@ -72,11 +72,6 @@ class FileManager:
             chunk_idx (int): Index of the chunk to load and cache.
         """
         # Minimize lock duration - only check and mark as in-progress
-        event = None
-        rdr = None
-        chunk_info = None
-        cache = None
-        
         with self._lock:
             # Check if file is still open and chunk isn't already cached
             if file_path not in self._files:
@@ -120,11 +115,10 @@ class FileManager:
             logger.error(f"Error prefetching chunk {chunk_idx} for {file_path}: {e}")
         finally:
             # Signal completion and cleanup
-            if event is not None:
-                with self._lock:
-                    event.set()
-                    if file_path in self._in_progress:
-                        self._in_progress[file_path].pop(chunk_idx, None)
+            with self._lock:
+                event.set()
+                if file_path in self._in_progress:
+                    self._in_progress[file_path].pop(chunk_idx, None)
 
     def open_file(self, file_path):
         """Opens a MEF file and initializes its state.
@@ -215,10 +209,11 @@ class FileManager:
                 return
             # --- PREFETCHING: Submit background tasks to load neighbors FIRST (before waiting) ---
             # This ensures prefetching happens eagerly, even before we need the current chunk
-            for i in range(1, self.n_prefetch + 1):
-                neighbor_before = chunk_idx - i
-                neighbor_after = chunk_idx + i
-                with self._lock:
+            # Batch check all neighbors in one lock acquisition to reduce contention
+            with self._lock:
+                for i in range(1, self.n_prefetch + 1):
+                    neighbor_before = chunk_idx - i
+                    neighbor_after = chunk_idx + i
                     if neighbor_before >= 0 and neighbor_before not in cache and neighbor_before not in in_progress:
                         self._prefetch_executor.submit(self._load_and_cache_chunk, file_path, neighbor_before)
                     if neighbor_after < len(chunks) and neighbor_after not in cache and neighbor_after not in in_progress:
