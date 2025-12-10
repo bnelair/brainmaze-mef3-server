@@ -1,0 +1,43 @@
+2025-12-10 21:36:11,856 INFO [MainThread] bnel_mef3_server.file_manager: Opened file: /tmp/tmp_rteq7pl/test_data.mefd
+2025-12-10 21:36:11,857 INFO [MainThread] bnel_mef3_server.file_manager: Set segment size to 60s for /tmp/tmp_rteq7pl/test_data.mefd, total segments: 5
+2025-12-10 21:36:12,866 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 1 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:13,648 INFO [MainThread] bnel_mef3_server.file_manager: Shutting down prefetch executor...
+2025-12-10 21:36:13,678 INFO [MainThread] bnel_mef3_server.file_manager: Opened file: /tmp/tmp_rteq7pl/test_data.mefd
+2025-12-10 21:36:13,679 INFO [MainThread] bnel_mef3_server.file_manager: Set segment size to 60s for /tmp/tmp_rteq7pl/test_data.mefd, total segments: 5
+2025-12-10 21:36:13,823 WARNING [MainThread] bnel_mef3_server.file_manager: Prefetch failed for chunk 0 for /tmp/tmp_rteq7pl/test_data.mefd, loading from disk.
+2025-12-10 21:36:13,823 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 0 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:13,970 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 1 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:14,112 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 2 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:14,263 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 3 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:14,405 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 4 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:14,546 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 0 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:14,722 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 1 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:14,866 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 2 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:15,017 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 3 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:15,159 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 4 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:15,304 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 0 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:15,449 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 1 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:15,592 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 2 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:15,755 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 3 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:15,919 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 4 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:16,060 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 0 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:16,207 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 1 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:16,350 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 2 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:16,500 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 3 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:16,642 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 4 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:16,784 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 0 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:16,931 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 1 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:17,074 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 2 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:17,228 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 3 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:17,370 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 4 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:17,511 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 0 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:17,655 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 1 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:17,798 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 2 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:17,949 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 3 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:18,094 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 4 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:18,236 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 0 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:18,382 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 1 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:18,525 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 2 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:18,675 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 3 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:18,817 INFO [MainThread] bnel_mef3_server.file_manager: Cache MISS: chunk 4 for /tmp/tmp_rteq7pl/test_data.mefd. Loading from disk.
+2025-12-10 21:36:18,964 INFO [MainThread] bnel_mef3_server.file_manager: Shutting down prefetch executor...
