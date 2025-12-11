@@ -69,20 +69,20 @@ def test_real_life_data(tmp_path, launch_server_process):
 
     cl.set_active_channels(pth_mef, channels[:32])
 
+    # Test changing segment sizes - this tests that the server can handle
+    # dynamically changing segment sizes without issues
     cl.set_signal_segment_size(pth_mef, 1*60)
-
     cl.set_signal_segment_size(pth_mef, 5*60)
-
     cl.set_signal_segment_size(pth_mef, 1*60)
 
-    n_segnments = (data_len_s) // (1*60)
+    n_segments = (data_len_s) // (1*60)
 
     x = cl.get_signal_segment(pth_mef, 0)
     assert x['array'][0].shape[0] == 1 * 60 * fs
 
-    for seg_idx in tqdm(range(n_segnments)):
+    for seg_idx in tqdm(range(n_segments)):
         x = cl.get_signal_segment(pth_mef, seg_idx)
         arr = x['array']
-        # Only 32 channels are active (set on line 68)
+        # Only 32 channels are active (set on line 70)
         for ch_idx in range(32):
             assert arr[ch_idx].shape[0] == 1*60*fs
