@@ -39,7 +39,7 @@ def launch_server_process():
 
 
 @pytest.mark.slow
-def test_real_life_data(tmp_path):
+def test_real_life_data(tmp_path, launch_server_process):
     pth = str(tmp_path)
     pth_mef = os.path.join(pth, "big_data_demo.mefd")
 
@@ -71,15 +71,16 @@ def test_real_life_data(tmp_path):
 
     cl.set_signal_segment_size(pth_mef, 5*60)
 
-    n_segnments = (data_len_s) // (5*60)
+    cl.set_signal_segment_size(pth_mef, 1*60)
+
+    n_segnments = (data_len_s) // (1*60)
 
     x = cl.get_signal_segment(pth_mef, 0)
-    assert x[0].shape[0] == 1 * 60 * fs
-
-    cl.set_signal_segment_size(pth_mef, 1*60)
+    assert x['array'][0].shape[0] == 1 * 60 * fs
 
     for seg_idx in tqdm(range(n_segnments)):
         x = cl.get_signal_segment(pth_mef, seg_idx)
-        for ch_idx in range(n_channels):
-            arr = x[ch_idx]
-            assert arr.shape[0] == 1*60*fs
+        arr = x['array']
+        # Only 32 channels are active (set on line 68)
+        for ch_idx in range(32):
+            assert arr[ch_idx].shape[0] == 1*60*fs
