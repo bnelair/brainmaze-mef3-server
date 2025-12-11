@@ -28,14 +28,16 @@ def launch_server_process():
     proc = multiprocessing.Process(target=server_entrypoint, daemon=True)
     proc.start()
 
-    # Wait briefly for the server to bind the port
-    time.sleep(1)
+    # Wait for the server to bind the port
+    time.sleep(2)
 
     yield
 
     # Terminate the process (triggers handle_sigterm in main)
     proc.terminate()
-    proc.join()
+    proc.join(timeout=5)
+    # Give a bit more time for the port to be released
+    time.sleep(0.5)
 
 
 @pytest.mark.slow
