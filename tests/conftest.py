@@ -18,6 +18,7 @@ from bnel_mef3_server.server.mef3_server import gRPCMef3Server, FileManager
 
 @pytest.fixture(scope="session")
 def mef3_file():
+    """Legacy fixture for backward compatibility (5 minutes of data)."""
     with tempfile.TemporaryDirectory() as tmpdir:
         file_path = os.path.join(tmpdir, "test_data.mefd")
         channel_names = [f"Ch{i}" for i in range(0, 64)]
@@ -35,6 +36,37 @@ def mef3_file():
             x = np.random.randn(fs*duration_s)
             wrt.write_data(x, ch, start_uutc=start_uutc, sampling_freq=fs, precision=3, discont_handler=False)
 
+        yield file_path
+
+
+@pytest.fixture(scope="session")
+def real_life_mef3_file():
+    """
+    Creates a realistic MEF3 file for benchmarks and testing.
+    - 64 channels
+    - 256 Hz sampling rate
+    - 2 hours of data (for benchmarks)
+    - precision=2 as specified
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        file_path = os.path.join(tmpdir, "big_data_demo.mefd")
+        
+        n_channels = 64
+        fs = 256
+        data_len_s = 2 * 60 * 60  # 2 hours for benchmarks
+        
+        wrt = MefWriter(file_path, overwrite=True)
+        wrt.mef_block_len = 10000
+        wrt.max_nans_written = 0
+        
+        # Use consistent timestamp in microseconds (MEF3 standard)
+        s = (datetime.datetime.now().timestamp() - 3600*24*100) * 1e6
+        
+        for idx in range(n_channels):
+            chname = f"chan_{idx+1:03d}"
+            x = np.random.randn(data_len_s * fs)
+            wrt.write_data(x, chname, s, fs, precision=2)
+        
         yield file_path
 
 
