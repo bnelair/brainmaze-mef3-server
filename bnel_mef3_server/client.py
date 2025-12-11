@@ -104,7 +104,7 @@ class Mef3Client:
 
     def get_signal_segment(self, file_path, chunk_idx):
         """
-        Retrieve the full signal segment (as a single numpy array) and its metadata for the requested segment.
+        Retrieve the full signal segment (as a single numpy array) and its metapytedata for the requested segment.
 
         Args:
             file_path (str): Path to the MEF3 file.
