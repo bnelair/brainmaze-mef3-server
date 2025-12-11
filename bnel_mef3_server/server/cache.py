@@ -70,3 +70,9 @@ class LRUCache:
         with self.lock:
             return key in self.cache
 
+    def clear(self):
+        """Clears all items from the cache.
+        """
+        with self.lock:
+            self.cache.clear()
+

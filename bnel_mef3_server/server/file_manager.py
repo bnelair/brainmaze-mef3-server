@@ -433,6 +433,15 @@ class FileManager:
                     else:
                         last_start = start_uutc
                     segments.append({'start': last_start, 'end': end_uutc})
+                
+                # Clear the cache and in-progress tracking when segment size changes to avoid stale data
+                cache = state['cache']
+                cache.clear()
+                # Clear in-progress prefetches for this file
+                if file_path in self._in_progress:
+                    self._in_progress[file_path].clear()
+                logger.debug(f"Cleared cache and in-progress prefetches for {file_path} due to segment size change")
+                
                 state['chunk_duration_s'] = seconds
                 state['chunks'] = segments
                 if segments:
