@@ -1,13 +1,25 @@
 # bnel-mef3-server
 
-A gRPC server for efficient, concurrent access to MEF3 (Multiscale Electrophysiology Format) files, with LRU caching and background prefetching. Designed for scalable neurophysiology data streaming and analysis.
+A gRPC server for efficient, concurrent access to MEF3 (Multiscale Electrophysiology Format) files, with LRU caching, multi-process parallel reading, and background prefetching. Designed for scalable neurophysiology data streaming and analysis.
 
 ## Features
 - gRPC API for remote MEF3 file access
 - Thread-safe LRU cache for signal chunks
+- **Multi-process parallel reading** to work around pymef global variable limitations
 - Asynchronous prefetching for low-latency streaming
 - Configurable via environment variables or Docker
 - Ready for deployment in Docker and CI/CD pipelines
+
+## Architecture
+
+The server uses a sophisticated multi-process architecture to achieve parallel MEF reading:
+
+- **Main Process**: Contains a MefReader instance in a separate thread for metadata operations and cache misses
+- **Worker Processes** (configurable, default: 2): Each has its own MefReader instance for parallel prefetching
+- **Coordinator Thread**: Manages prefetch tasks and collects results from worker processes
+- **Thread Pool**: Fallback for non-worker operations and metadata queries
+
+This architecture works around pymef's global variable limitations, enabling true parallel I/O on SSD storage.
 
 ## Installation
 
@@ -39,14 +51,21 @@ python -m bnel_mef3_server
 
 #### Configuration via Environment Variables
 - `PORT`: gRPC server port (default: 50051)
-- `N_PREFETCH`: Number of chunks to prefetch (default: 3)
-- `CACHE_CAPACITY_MULTIPLIER`: Extra cache slots (default: 3)
-- `MAX_WORKERS`: Prefetch thread pool size (default: 4)
+- `N_PREFETCH`: Number of chunks to prefetch ahead (default: 3)
+- `CACHE_CAPACITY_MULTIPLIER`: Extra cache slots beyond prefetch window (default: 3)
+- `MAX_WORKERS`: Thread pool size for fallback operations (default: 4)
+- `N_PROCESS_WORKERS`: Number of worker processes for parallel MEF reading (default: 2)
 
 Example:
 ```sh
-PORT=50052 N_PREFETCH=2 python -m bnel_mef3_server
+PORT=50052 N_PREFETCH=5 N_PROCESS_WORKERS=4 python -m bnel_mef3_server
 ```
+
+**Performance Tuning Guidelines:**
+- **For SSD storage**: Use `N_PROCESS_WORKERS=2-4` to enable parallel I/O
+- **For sequential access patterns**: Increase `N_PREFETCH` (e.g., 5-10) for smoother streaming
+- **For random access**: Keep `N_PREFETCH` lower (1-3) and increase `CACHE_CAPACITY_MULTIPLIER`
+- **Single-process mode**: Set `N_PROCESS_WORKERS=0` to disable parallel reading (useful for debugging)
 
 ### As a Docker Container
 ```sh
@@ -59,13 +78,36 @@ docker run -e PORT=50051 -e N_PREFETCH=2 -p 50051:50051 bnel-mef3-server
 You can launch the gRPC server directly from Python by importing and running the server class:
 
 ```python
+from bnel_mef3_server.server.mef3_server import gRPCMef3ServerHandler
+
+# Configure and start server with parallel reading enabled
+handler = gRPCMef3ServerHandler(
+    port=50052,
+    n_prefetch=5,                    # Prefetch 5 segments ahead
+    cache_capacity_multiplier=10,     # Keep 10 extra segments in cache
+    max_workers=4,                    # Thread pool size
+    n_process_workers=2               # Use 2 worker processes for parallel reading
+)
+
+print(f"Server started with parallel reading support")
+# Server runs in background, call handler.stop() to stop it
+```
+
+Alternatively, using FileManager directly:
+
+```python
 from bnel_mef3_server.server.mef3_server import gRPCMef3Server
 from bnel_mef3_server.server.file_manager import FileManager
 import grpc
 from concurrent import futures
 
-# Configure file manager (optional arguments: n_prefetch, cache_capacity_multiplier, max_workers)
-file_manager = FileManager(n_prefetch=3, cache_capacity_multiplier=3, max_workers=4)
+# Configure file manager with parallel workers
+file_manager = FileManager(
+    n_prefetch=3, 
+    cache_capacity_multiplier=3, 
+    max_workers=4,
+    n_process_workers=2  # Enable parallel reading
+)
 
 # Create the gRPC server and add the MEF3 service
 server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
