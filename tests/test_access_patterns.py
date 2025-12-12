@@ -20,6 +20,7 @@ SLEEP_SECONDS = 0.3 # simulating processing delay
 N_PREFETCH = 1
 MAX_WORKERS = 20
 CACHE_CAPACITY_MULTIPLIER = 30
+N_PROCESS_WORKERS = 2  # Number of worker processes for parallel reading
 
 # --- Helper functions for access patterns ---
 
@@ -74,7 +75,7 @@ def test_grpc_sequential_forward_with_prefetch(benchmark, benchmark_mef3_file, g
     Sequential forward access via gRPC WITH prefetching.
     20 chunks, 60s each.
     """
-    port = grpc_server_factory(n_prefetch=N_PREFETCH, cache_capacity_multiplier=CACHE_CAPACITY_MULTIPLIER, max_workers=MAX_WORKERS)
+    port = grpc_server_factory(n_prefetch=N_PREFETCH, cache_capacity_multiplier=CACHE_CAPACITY_MULTIPLIER, max_workers=MAX_WORKERS, n_process_workers=N_PROCESS_WORKERS)
     client = Mef3Client(f"localhost:{port}")
     
     # Setup
@@ -98,7 +99,7 @@ def test_grpc_sequential_forward_no_prefetch(benchmark, benchmark_mef3_file, grp
     Sequential forward access via gRPC WITHOUT prefetching.
     20 chunks, 60s each.
     """
-    port = grpc_server_factory(n_prefetch=0, cache_capacity_multiplier=0, max_workers=1)
+    port = grpc_server_factory(n_prefetch=0, cache_capacity_multiplier=0, max_workers=1, n_process_workers=0)
     client = Mef3Client(f"localhost:{port}")
 
     
