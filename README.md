@@ -261,6 +261,30 @@ fm = FileManager(
 
 ### Performance Characteristics
 
+**Benchmark Results** (from `tests/test_access_patterns.py`):
+
+Test data specifications:
+- **Dataset**: 2 hours of continuous EEG data
+- **Channels**: 64 channels  
+- **Sampling Rate**: 256 Hz
+- **MEF Compression**: Precision level 2
+- **Segment Size**: 5 minutes (24 total segments)
+- **Test Configuration**: 10 segments with 0.3s processing delay between reads
+
+Performance comparison (total time for 10 segments):
+| Access Pattern | Time | vs Baseline | Description |
+|----------------|------|-------------|-------------|
+| **Concurrent (3 clients)** | 3.6s | **+113%** | 3 clients reading different segments simultaneously |
+| **With Prefetch** | 6.7s | **+15%** | Sequential access with n_prefetch=1, n_process_workers=2 |
+| **Baseline (Direct MefReader)** | 7.7s | — | Direct mef_tools access, no server overhead |
+| **Without Prefetch** | 9.2s | **-19%** | Sequential access with no prefetching |
+
+Key findings:
+- Concurrent access provides **2.5x speedup** over no-prefetch mode
+- Prefetching provides **37% speedup** over no-prefetch mode  
+- Server with prefetching is **15% faster** than direct MefReader baseline
+- The multi-process architecture enables true parallel I/O despite pymef limitations
+
 **Cache Hit Performance:**
 - In-memory access: <1ms per segment
 - No I/O or decompression overhead

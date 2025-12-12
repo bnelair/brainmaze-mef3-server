@@ -32,22 +32,32 @@ Successfully implemented a multi-process architecture for parallel MEF3 file rea
 
 ## Performance Results
 
-Benchmark: 10 segments, 5-minute chunks, 64 channels, 0.3s processing delay
+**Comprehensive Benchmarks** (from `tests/test_access_patterns.py`):
 
-| Configuration | Time (s) | vs Baseline | vs No-Prefetch |
-|--------------|----------|-------------|----------------|
-| With Prefetch + Workers | 6.32 | **+16%** | **+26%** |
-| Baseline (Direct MefReader) | 7.56 | - | -12% |
-| No Prefetch | 8.59 | -14% | - |
+Test data: 2 hours continuous EEG, 64 channels, 256 Hz, 5-minute segments
 
-File Manager Tests: 5 segments, 10-second chunks
-- With prefetch: ~20ms per segment
-- Without prefetch: ~720ms per segment
-- **36x speedup** with prefetching
+| Configuration | Time (s) | vs Baseline | Description |
+|--------------|----------|-------------|-------------|
+| **Concurrent (3 clients)** | 3.6 | **+113%** | Best - parallel access from 3 clients |
+| **With Prefetch** | 6.7 | **+15%** | Sequential with n_prefetch=1, 2 workers |
+| **Baseline (Direct MefReader)** | 7.7 | — | Direct mef_tools access |
+| **No Prefetch** | 9.2 | **-19%** | Sequential with no prefetching |
+
+**Key Achievements:**
+- Concurrent access: **2.5x faster** than no-prefetch mode
+- Prefetching: **37% faster** than no-prefetch mode
+- Server with prefetch: **15% faster** than direct MefReader
+- Multi-process architecture successfully enables parallel I/O
 
 ## Testing
-All 32 tests pass:
+All 41 tests pass:
+- ✅ Benchmark tests (4 tests in test_access_patterns.py)
 - ✅ Cache tests (10 tests)
+- ✅ Client tests (3 tests)
+- ✅ Error handling tests (10 tests - new)
+- ✅ File manager tests (9 tests)
+- ✅ Server tests (4 tests)
+- ✅ Integrity test (1 test)
 - ✅ Client tests (3 tests)
 - ✅ File manager tests (12 tests)
 - ✅ Server tests (4 tests)
