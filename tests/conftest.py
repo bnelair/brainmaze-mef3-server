@@ -146,47 +146,49 @@ def launch_server_process():
 
 
 # --- Server and Client Fixtures ---------------------------------------
-@pytest.fixture(scope="session")
-def grpc_server():
-    """Starts and stops the gRPC server for the test session."""
+def create_grpc_server(n_prefetch, cache_capacity_multiplier, max_workers):
+    """Factory function to create a gRPC server with specific FileManager settings."""
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    file_manager = FileManager(3, 3, 4)
+    file_manager = FileManager(n_prefetch, cache_capacity_multiplier, max_workers)
     servicer = gRPCMef3Server(file_manager)
     pb2_grpc.add_gRPCMef3ServerServicer_to_server(servicer, server)
+    return server
 
-    port = 50052
-    server.add_insecure_port(f"localhost:{port}")  # Changed from [::] to localhost
+@pytest.fixture(scope="function")
+def grpc_server_factory():
+    """
+    Factory fixture to create and manage a gRPC server for a single test.
+    Yields a function that starts the server and returns the port.
+    Handles teardown automatically.
+    """
+    servers = []
+    # Start port allocation from a base number
+    next_port = 50060
 
-    server_thread = threading.Thread(target=server.start)
-    server_thread.daemon = True
-    server_thread.start()
+    def _server_starter(n_prefetch, cache_capacity_multiplier, max_workers):
+        nonlocal next_port
+        port = next_port
+        # Increment port number to ensure each server in a test run gets a unique port
+        next_port += 1
 
-    # Give the server a moment to start up in the background thread
-    time.sleep(0.1)
+        server = create_grpc_server(n_prefetch, cache_capacity_multiplier, max_workers)
+        server.add_insecure_port(f"localhost:{port}")
 
-    print(f"\nTest gRPC server started on port {port}")
+        server_thread = threading.Thread(target=server.start, daemon=True)
+        server_thread.start()
+        time.sleep(0.1)
 
-    server_info = {"port": port, "server": server}
-    yield server_info
+        servers.append(server)
+        print(f"\nStarted test gRPC server on port {port} with n_prefetch={n_prefetch}")
+        return port
 
-    print("\nStopping test gRPC server...")
-    server.stop(0)
+    yield _server_starter
 
+    # Teardown logic: stop all servers created by the factory
+    for server in servers:
+        print(f"\nStopping test gRPC server...")
+        server.stop(0)
 
-@pytest.fixture(scope="session")
-def grpc_stub_1(grpc_server):
-    """Creates a gRPC client stub for the test session."""
-    port = grpc_server["port"]
-    channel = grpc.insecure_channel(f"localhost:{port}")
-    stub = pb2_grpc.gRPCMef3ServerStub(channel)
-    yield stub
-    channel.close()
-
-@pytest.fixture(scope="session")
-def grpc_stub_2(grpc_server):
-    """Creates a gRPC client stub for the test session."""
-    port = grpc_server["port"]
-    channel = grpc.insecure_channel(f"localhost:{port}")
-    stub = pb2_grpc.gRPCMef3ServerStub(channel)
-    yield stub
-    channel.close()
+    # Add a small delay to ensure ports are released
+    if servers:
+        time.sleep(0.2)

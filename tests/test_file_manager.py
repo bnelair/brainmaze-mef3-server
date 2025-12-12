@@ -11,8 +11,7 @@ import bnel_mef3_server.protobufs.gRPCMef3Server_pb2 as pb2
 
 from .conftest import mef3_file
 
-# @patch("bnel_mef3_server.server.file_manager.gRPCMef3Server_pb2")
-# @patch("bnel_mef3_server.server.file_manager.MefReader")
+
 def test_open_and_close_file(mef3_file):
     fm = FileManager()
     resp = fm.open_file(mef3_file)
