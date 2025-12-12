@@ -51,17 +51,21 @@ class FileManager:
         """
         self._files = {}
         self._lock = threading.Lock()
+        # OPTIMIZATION: Dedicated I/O lock to serialize disk reads and eliminate contention
+        self._io_lock = threading.Lock()
 
-        # --- NEW: Configuration for caching ---
+        # --- Configuration for caching ---
         self.n_prefetch = n_prefetch  # Number of chunks to prefetch before and after
         self.cache_capacity = (n_prefetch * 2) + cache_capacity_multiplier
 
-        # --- NEW: Dedicated thread pool for background data loading ---
+        # --- Dedicated thread pool for background data loading ---
         self._prefetch_executor = futures.ThreadPoolExecutor(
             max_workers=max_workers, thread_name_prefix='cache_prefetch'
         )
         # Track in-progress prefetches: {file_path: {chunk_idx: threading.Event}}
         self._in_progress = {}
+        # Track last requested chunk per file for sequential access detection
+        self._last_chunk = {}
 
     # --- NEW: Helper method for background loading ---
     def _load_and_cache_chunk(self, file_path, chunk_idx):
@@ -102,11 +106,16 @@ class FileManager:
             rdr = state['reader']
             chunk_info = chunks[chunk_idx]
 
-        # --- Data reading happens outside the main lock ---
+        # --- Data reading happens outside the main lock but WITH I/O lock ---
         try:
-            channels = rdr.channels
-            data = rdr.get_data(channels, chunk_info['start'], chunk_info['end'])
-            data = np.array(data)
+            # OPTIMIZATION: Serialize I/O operations to eliminate disk contention
+            with self._io_lock:
+                # OPTIMIZATION: Only load all channels (active channel filtering happens in get_signal_segment)
+                # We load all channels here because prefetch happens before we know which chunk will be requested
+                # and the active channels for the request
+                channels = rdr.channels
+                data = rdr.get_data(channels, chunk_info['start'], chunk_info['end'])
+                data = np.array(data)
 
             # --- Put loaded data into the cache only if chunk info is still valid ---
             # This prevents stale data from being cached if segment size changed during prefetch
@@ -216,17 +225,19 @@ class FileManager:
                     error_message=f"Invalid chunk request: {chunk_idx} for {file_path}"
                 )
                 return
-            # --- PREFETCHING: Submit background tasks to load neighbors FIRST (before waiting) ---
-            # This ensures prefetching happens eagerly, even before we need the current chunk
-            # Batch check all neighbors in one lock acquisition to reduce contention
-            with self._lock:
-                for i in range(1, self.n_prefetch + 1):
-                    neighbor_before = chunk_idx - i
-                    neighbor_after = chunk_idx + i
-                    if neighbor_before >= 0 and neighbor_before not in cache and neighbor_before not in in_progress:
-                        self._prefetch_executor.submit(self._load_and_cache_chunk, file_path, neighbor_before)
-                    if neighbor_after < len(chunks) and neighbor_after not in cache and neighbor_after not in in_progress:
-                        self._prefetch_executor.submit(self._load_and_cache_chunk, file_path, neighbor_after)
+            # --- OPTIMIZATION: Smart forward-only prefetching for sequential access ---
+            # Only prefetch if this looks like sequential forward access
+            # This reduces unnecessary prefetching and I/O contention
+            last_chunk_idx = self._last_chunk.get(file_path, -1)
+            is_sequential_forward = (chunk_idx == last_chunk_idx + 1) or (last_chunk_idx == -1)
+            self._last_chunk[file_path] = chunk_idx
+            
+            if is_sequential_forward:
+                with self._lock:
+                    for i in range(1, self.n_prefetch + 1):
+                        future_chunk = chunk_idx + i
+                        if future_chunk < len(chunks) and future_chunk not in cache and future_chunk not in in_progress:
+                            self._prefetch_executor.submit(self._load_and_cache_chunk, file_path, future_chunk)
             
             data = cache.get(chunk_idx)
             if data is not None:
@@ -262,8 +273,10 @@ class FileManager:
                     # --- CACHE MISS (not in progress or prefetch failed) ---
                     try:
                         chunk_info = chunks[chunk_idx]
-                        data = rdr.get_data(active_channels, chunk_info['start'], chunk_info['end'])
-                        data = np.array(data)
+                        # OPTIMIZATION: Serialize I/O operations to eliminate disk contention
+                        with self._io_lock:
+                            data = rdr.get_data(active_channels, chunk_info['start'], chunk_info['end'])
+                            data = np.array(data)
                         cache.put(chunk_idx, data)
                     except Exception as e:
                         logger.error(f"Error loading chunk {chunk_idx} for {file_path}: {e}")
