@@ -47,15 +47,95 @@ class FileManager:
       - Coordinator thread: Manages prefetch tasks and collects results from workers
     """
 
-    def __init__(self, n_prefetch=2, cache_capacity_multiplier=5, max_workers=4, n_process_workers=2):
+    def __init__(self, n_prefetch=2, cache_capacity_multiplier=5, n_process_workers=2):
         """
-        Initialize the FileManager.
+        Initialize the FileManager with caching and parallel reading support.
+
+        The FileManager coordinates data access across multiple MEF files using a sophisticated
+        caching and prefetching system. It employs a multi-process architecture to achieve
+        true parallel I/O, working around pymef's global variable limitations.
+
+        **Architecture Overview:**
+        
+        1. **Main Thread Reader**: 
+           - Handles synchronous operations (metadata queries, cache misses)
+           - Contains a MefReader instance for immediate data access
+           
+        2. **Worker Processes** (n_process_workers):
+           - Each runs in a separate Python process with isolated MefReader
+           - Performs parallel prefetching of future segments
+           - Communicates via multiprocessing queues
+           
+        3. **Coordinator Thread**:
+           - Collects results from worker processes
+           - Updates the LRU cache with prefetched data
+           - Ensures thread-safe cache operations
+           
+        4. **Fallback Thread Pool**:
+           - Handles prefetch task submission when workers unavailable
+           - Provides graceful degradation if workers crash
+        
+        **Caching Strategy:**
+        
+        The LRU cache stores recently accessed segments with capacity:
+        `cache_capacity = n_prefetch + cache_capacity_multiplier`
+        
+        - `n_prefetch`: Forward-looking segments for sequential access
+        - `cache_capacity_multiplier`: Additional slots for backward navigation
+        
+        When a segment is requested:
+        1. Check cache → return immediately if hit
+        2. Check if prefetch in progress → wait for completion
+        3. Read from disk (main thread) → cache the result
+        4. Trigger prefetch for next n_prefetch segments via worker processes
+        
+        **Prefetch Workflow:**
+        
+        ```
+        Client Request (segment N)
+              ↓
+        [Cache Hit?] → Yes → Return immediately
+              ↓ No
+        [Prefetch pending?] → Yes → Wait for worker
+              ↓ No
+        Load from disk (main thread)
+              ↓
+        Submit prefetch tasks for segments N+1, N+2, ..., N+n_prefetch
+              ↓
+        Worker processes read in parallel
+              ↓
+        Coordinator thread caches results
+              ↓
+        Future requests hit cache
+        ```
 
         Args:
-            n_prefetch (int): Number of chunks to prefetch ahead for sequential access.
-            cache_capacity_multiplier (int): Additional cache capacity beyond the prefetch window.
-            max_workers (int): Maximum number of background threads for prefetching (legacy, kept for compatibility).
-            n_process_workers (int): Number of separate worker processes for parallel MEF reading (default: 2).
+            n_prefetch (int): Number of segments to prefetch ahead during sequential access.
+                Higher values improve streaming performance but use more memory.
+                Recommended: 3-5 for sequential access, 1-2 for random access.
+                Default: 2
+                
+            cache_capacity_multiplier (int): Extra cache slots beyond the prefetch window.
+                Allows caching of previously accessed segments for backward navigation.
+                Total cache capacity = n_prefetch + cache_capacity_multiplier
+                Recommended: 5-10 for viewer apps, 3-5 for analysis workflows.
+                Default: 5
+                
+            n_process_workers (int): Number of worker processes for parallel MEF reading.
+                Each worker has an independent MefReader, enabling true parallel I/O.
+                Set to 0 to disable parallel reading (useful for debugging).
+                Recommended: 2-4 for SSD storage, 0-1 for network storage.
+                Default: 2
+
+        Example:
+            >>> # Sequential streaming with aggressive prefetch
+            >>> fm = FileManager(n_prefetch=10, cache_capacity_multiplier=15, n_process_workers=4)
+            >>> 
+            >>> # Random access with large cache
+            >>> fm = FileManager(n_prefetch=2, cache_capacity_multiplier=20, n_process_workers=2)
+            >>> 
+            >>> # Debug mode (single process)
+            >>> fm = FileManager(n_prefetch=3, cache_capacity_multiplier=5, n_process_workers=0)
         """
         self._files = {}
         self._lock = threading.Lock()
@@ -87,10 +167,11 @@ class FileManager:
             )
             self._coordinator_thread.start()
 
-        # --- Fallback thread pool for non-worker prefetching (when workers are busy) ---
-        # This is also used for metadata operations
+        # --- Fallback thread pool for prefetch task submission ---
+        # Used to submit prefetch tasks to worker pool without blocking main thread
+        # Fixed size is sufficient since it only submits tasks, doesn't do I/O
         self._prefetch_executor = futures.ThreadPoolExecutor(
-            max_workers=max_workers, thread_name_prefix='cache_prefetch'
+            max_workers=4, thread_name_prefix='prefetch_submit'
         )
         
         # Track in-progress prefetches with Events: {file_path: {chunk_idx: threading.Event}}

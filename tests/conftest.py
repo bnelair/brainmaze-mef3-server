@@ -146,10 +146,10 @@ def launch_server_process():
 
 
 # --- Server and Client Fixtures ---------------------------------------
-def create_grpc_server(n_prefetch, cache_capacity_multiplier, max_workers, n_process_workers=0):
+def create_grpc_server(n_prefetch, cache_capacity_multiplier, n_process_workers=0):
     """Factory function to create a gRPC server with specific FileManager settings."""
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    file_manager = FileManager(n_prefetch, cache_capacity_multiplier, max_workers, n_process_workers)
+    file_manager = FileManager(n_prefetch, cache_capacity_multiplier, n_process_workers)
     servicer = gRPCMef3Server(file_manager)
     pb2_grpc.add_gRPCMef3ServerServicer_to_server(servicer, server)
     return server
@@ -166,13 +166,13 @@ def grpc_server_factory():
     # Start port allocation from a base number
     next_port = 50060
 
-    def _server_starter(n_prefetch, cache_capacity_multiplier, max_workers, n_process_workers=0):
+    def _server_starter(n_prefetch, cache_capacity_multiplier, n_process_workers=0):
         nonlocal next_port
         port = next_port
         # Increment port number to ensure each server in a test run gets a unique port
         next_port += 1
 
-        server = create_grpc_server(n_prefetch, cache_capacity_multiplier, max_workers, n_process_workers)
+        server = create_grpc_server(n_prefetch, cache_capacity_multiplier, n_process_workers)
         server.add_insecure_port(f"localhost:{port}")
 
         server_thread = threading.Thread(target=server.start, daemon=True)
@@ -204,7 +204,7 @@ def shared_test_server():
     # Create server with default settings (n_process_workers=0 for testing to avoid complexity)
     # Use port 50052 to avoid conflict with launch_server_process (port 50051)
     port = 50052
-    server = create_grpc_server(n_prefetch=3, cache_capacity_multiplier=3, max_workers=4, n_process_workers=0)
+    server = create_grpc_server(n_prefetch=3, cache_capacity_multiplier=3, n_process_workers=0)
     server.add_insecure_port(f"localhost:{port}")
     
     # Start server in a thread

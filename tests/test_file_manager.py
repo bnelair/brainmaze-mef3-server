@@ -147,7 +147,7 @@ def access_pattern(file_manager, file_path):
 def test_with_prefetch_real_file(benchmark, mef3_file):
     """Benchmark the access pattern WITH prefetching on a REAL file."""
     # this is much faster than no-prefetch for data with 256 channels. If this is much slower, the test is probably using a few channels.
-    fm = FileManager(n_prefetch=10, cache_capacity_multiplier=10, max_workers=12)  # Prefetching is enabled
+    fm = FileManager(n_prefetch=10, cache_capacity_multiplier=10, n_process_workers=2)  # Prefetching is enabled
     fm.open_file(mef3_file)
     fm.set_signal_segment_size(mef3_file, seconds=60)  # Use 1-second segments
     benchmark(access_pattern, fm, mef3_file)
