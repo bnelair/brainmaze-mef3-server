@@ -120,31 +120,6 @@ def functional_test_mef3_file(tmp_path_factory):
     return pth_mef
 
 
-@pytest.fixture(scope="function")
-def launch_server_process():
-    """
-    Launches the gRPC server main() in a separate process.
-    Used for functional tests that need server on port 50051.
-    """
-    import multiprocessing
-    from bnel_mef3_server.server.__main__ import main as server_entrypoint
-    
-    # Initialize process targeting the main entrypoint
-    proc = multiprocessing.Process(target=server_entrypoint, daemon=True)
-    proc.start()
-
-    # Wait for the server to bind the port and be ready
-    time.sleep(3)
-
-    yield
-
-    # Terminate the process (triggers handle_sigterm in main)
-    proc.terminate()
-    proc.join(timeout=5)
-    # Give a bit more time for the port to be released
-    time.sleep(1.0)
-
-
 # --- Server and Client Fixtures ---------------------------------------
 def create_grpc_server(n_prefetch, cache_capacity_multiplier, n_process_workers=0):
     """Factory function to create a gRPC server with specific FileManager settings."""
