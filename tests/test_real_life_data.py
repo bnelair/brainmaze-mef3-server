@@ -70,19 +70,19 @@ def test_real_life_data(functional_test_mef3_file, launch_server_process):
 
 
 @pytest.mark.slow
-def test_dynamic_parameter_changes(functional_test_mef3_file, launch_server_process):
+def test_dynamic_parameter_changes(functional_test_mef3_file, launch_server_process, request):
     """
     Test that the server handles frequent parameter changes gracefully.
     This simulates real-world usage where users frequently adjust window sizes and channels.
     """
     pth_mef = functional_test_mef3_file
     fs = MEF3_TEST_FS
-    
+
     cl = Mef3Client("localhost:50051")
+    request.addfinalizer(cl.shutdown)
     cl.open_file(pth_mef)
     fi = cl.get_file_info(pth_mef)
     channels = fi["channel_names"]
-    
     # Test rapid window size changes
     window_sizes = [30, 60, 120, 300, 60, 30]  # seconds
     for window_size in window_sizes:
