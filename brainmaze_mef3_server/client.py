@@ -1,8 +1,8 @@
 import grpc
 import numpy as np
 
-import bnel_mef3_server.protobufs.gRPCMef3Server_pb2 as pb2
-import bnel_mef3_server.protobufs.gRPCMef3Server_pb2_grpc as pb2_grpc
+import brainmaze_mef3_server.protobufs.gRPCMef3Server_pb2 as pb2
+import brainmaze_mef3_server.protobufs.gRPCMef3Server_pb2_grpc as pb2_grpc
 
 class Mef3Client:
     """

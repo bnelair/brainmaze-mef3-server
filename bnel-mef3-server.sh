@@ -7,5 +7,5 @@ echo "Python version: $(python --version)"
 echo "Working directory: $(pwd)"
 
 # Launch the gRPC server
-exec python -u -m bnel_mef3_server.server
+exec python -u -m brainmaze_mef3_server.server
 

@@ -11,7 +11,7 @@ It should be run manually for integration testing but not as part of regular CI/
 import sys
 import os
 import time
-from bnel_mef3_server.client import Mef3Client
+from brainmaze_mef3_server.client import Mef3Client
 
 def test_big_data():
     """Test the MEF3 server with big data."""

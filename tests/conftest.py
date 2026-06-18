@@ -11,9 +11,9 @@ import grpc
 import threading
 from concurrent import futures
 
-import bnel_mef3_server.protobufs.gRPCMef3Server_pb2_grpc as pb2_grpc
+import brainmaze_mef3_server.protobufs.gRPCMef3Server_pb2_grpc as pb2_grpc
 
-from bnel_mef3_server.server.mef3_server import gRPCMef3Server, FileManager
+from brainmaze_mef3_server.server.mef3_server import gRPCMef3Server, FileManager
 
 
 @pytest.fixture(scope="session")
@@ -127,7 +127,7 @@ def launch_server_process():
     Used for functional tests that need server on port 50051.
     """
     import multiprocessing
-    from bnel_mef3_server.server.__main__ import main as server_entrypoint
+    from brainmaze_mef3_server.server.__main__ import main as server_entrypoint
     
     # Initialize process targeting the main entrypoint
     proc = multiprocessing.Process(target=server_entrypoint, daemon=True)

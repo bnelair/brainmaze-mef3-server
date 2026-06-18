@@ -2,14 +2,14 @@
 import grpc
 from concurrent import futures
 
-from bnel_mef3_server.server.log_manager import get_logger, setup_logging
-from bnel_mef3_server.server.config_manager import read_app_config, get_log_level_from_config
+from brainmaze_mef3_server.server.log_manager import get_logger, setup_logging
+from brainmaze_mef3_server.server.config_manager import read_app_config, get_log_level_from_config
 import os
 
-import bnel_mef3_server.protobufs.gRPCMef3Server_pb2 as gRPCMef3Server_pb2
-import bnel_mef3_server.protobufs.gRPCMef3Server_pb2_grpc as gRPCMef3Server_pb2_grpc
+import brainmaze_mef3_server.protobufs.gRPCMef3Server_pb2 as gRPCMef3Server_pb2
+import brainmaze_mef3_server.protobufs.gRPCMef3Server_pb2_grpc as gRPCMef3Server_pb2_grpc
 
-from bnel_mef3_server.server.file_manager import FileManager
+from brainmaze_mef3_server.server.file_manager import FileManager
 
 # Setup logging before anything else
 def _init_logging():
@@ -21,7 +21,7 @@ def _init_logging():
     return log_file
 
 _init_logging()
-logger = get_logger("bnel_mef3_server")
+logger = get_logger("brainmaze_mef3_server")
 
 
 class gRPCMef3Server(gRPCMef3Server_pb2_grpc.gRPCMef3ServerServicer):

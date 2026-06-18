@@ -5,9 +5,9 @@ import concurrent.futures
 import os
 import time
 
-from bnel_mef3_server.server.file_manager import FileManager
+from brainmaze_mef3_server.server.file_manager import FileManager
 from mef_tools import MefReader
-import bnel_mef3_server.protobufs.gRPCMef3Server_pb2 as pb2
+import brainmaze_mef3_server.protobufs.gRPCMef3Server_pb2 as pb2
 
 from .conftest import mef3_file
 

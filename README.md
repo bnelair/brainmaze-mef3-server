@@ -37,7 +37,7 @@ docker run -e PORT=50051 -p 50051:50051 brainmaze-mef3-server
 ### As a Python Module
 Run the server with configurable options:
 ```sh
-python -m bnel_mef3_server
+python -m brainmaze_mef3_server
 ```
 
 #### Configuration via Environment Variables
@@ -48,7 +48,7 @@ python -m bnel_mef3_server
 
 Example:
 ```sh
-PORT=50052 N_PREFETCH=2 python -m bnel_mef3_server
+PORT=50052 N_PREFETCH=2 python -m brainmaze_mef3_server
 ```
 
 ### As a Docker Container
@@ -62,8 +62,8 @@ docker run -e PORT=50051 -e N_PREFETCH=2 -p 50051:50051 brainmaze-mef3-server
 You can launch the gRPC server directly from Python by importing and running the server class:
 
 ```python
-from bnel_mef3_server.server.mef3_server import gRPCMef3Server
-from bnel_mef3_server.server.file_manager import FileManager
+from brainmaze_mef3_server.server.mef3_server import gRPCMef3Server
+from brainmaze_mef3_server.server.file_manager import FileManager
 import grpc
 from concurrent import futures
 
@@ -73,7 +73,7 @@ file_manager = FileManager(n_prefetch=3, cache_capacity_multiplier=3, max_worker
 # Create the gRPC server and add the MEF3 service
 server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 servicer = gRPCMef3Server(file_manager)
-from bnel_mef3_server.protobufs.gRPCMef3Server_pb2_grpc import add_gRPCMef3ServerServicer_to_server
+from brainmaze_mef3_server.protobufs.gRPCMef3Server_pb2_grpc import add_gRPCMef3ServerServicer_to_server
 add_gRPCMef3ServerServicer_to_server(servicer, server)
 
 # Start the server
@@ -88,7 +88,7 @@ server.wait_for_termination()
 The package provides a high-level client for interacting with the server:
 
 ```python
-from bnel_mef3_server.client import Mef3Client
+from brainmaze_mef3_server.client import Mef3Client
 
 client = Mef3Client("localhost:50052")
 
@@ -123,14 +123,14 @@ client.shutdown()
 See the [API section](#api) and the Python docstrings for more details on each method.
 
 ## API
-The server exposes a gRPC API. See `bnel_mef3_server/protobufs/gRPCMef3Server.proto` for service and message definitions.
+The server exposes a gRPC API. See `brainmaze_mef3_server/protobufs/gRPCMef3Server.proto` for service and message definitions.
 
 ## Testing with Large Data
 For testing with real-life large MEF3 files, use the `demo/run_big_data.py` script:
 
 ```sh
 # Start the server
-python -m bnel_mef3_server.server &
+python -m brainmaze_mef3_server.server &
 
 # Run the big data test
 python demo/run_big_data.py /path/to/large_file.mefd localhost:50051

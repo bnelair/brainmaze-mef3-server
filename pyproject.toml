@@ -48,7 +48,7 @@ addopts = "-m 'not slow and not benchmark'"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["bnel_mef3_server*"]
+include = ["brainmaze_mef3_server*"]
 
 [tool.setuptools]
 include-package-data = true

@@ -53,7 +53,7 @@ Run the server with configurable options:
 
 .. code-block:: bash
 
-   python -m bnel_mef3_server
+   python -m brainmaze_mef3_server
 
 Configuration via Environment Variables:
 
@@ -69,7 +69,7 @@ The package provides a high-level client for interacting with the server:
 
 .. code-block:: python
 
-   from bnel_mef3_server.client import Mef3Client
+   from brainmaze_mef3_server.client import Mef3Client
 
    client = Mef3Client("localhost:50052")
 

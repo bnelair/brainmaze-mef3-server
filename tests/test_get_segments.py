@@ -1,6 +1,6 @@
 """Tests for get_number_of_segments functionality."""
 import pytest
-from bnel_mef3_server.server.file_manager import FileManager
+from brainmaze_mef3_server.server.file_manager import FileManager
 from .conftest import mef3_file
 
 
@@ -48,7 +48,7 @@ def test_get_number_of_segments(mef3_file):
 
 def test_get_number_of_segments_via_grpc(grpc_stub_1, mef3_file):
     """Test getting the number of segments via gRPC."""
-    import bnel_mef3_server.protobufs.gRPCMef3Server_pb2 as pb2
+    import brainmaze_mef3_server.protobufs.gRPCMef3Server_pb2 as pb2
     
     # Open the file
     open_resp = grpc_stub_1.OpenFile(pb2.OpenFileRequest(file_path=mef3_file))

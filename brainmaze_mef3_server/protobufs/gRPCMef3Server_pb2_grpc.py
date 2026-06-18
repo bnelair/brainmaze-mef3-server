@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from bnel_mef3_server.protobufs import gRPCMef3Server_pb2 as gRPCMef3Server__pb2
+from brainmaze_mef3_server.protobufs import gRPCMef3Server_pb2 as gRPCMef3Server__pb2
 
 GRPC_GENERATED_VERSION = '1.75.1'
 GRPC_VERSION = grpc.__version__

@@ -6,7 +6,7 @@ retrieving signal data, and closing the file using the high-level Python client.
 
 Assumes the server is running in Docker and demo/test_file.mefd exists.
 """
-from bnel_mef3_server.client import Mef3Client
+from brainmaze_mef3_server.client import Mef3Client
 import numpy as np
 import os
 

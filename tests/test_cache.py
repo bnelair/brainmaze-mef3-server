@@ -1,6 +1,6 @@
 import pytest
 import threading
-from bnel_mef3_server.server.cache import LRUCache
+from brainmaze_mef3_server.server.cache import LRUCache
 
 def test_put_and_get():
     cache = LRUCache(2)
