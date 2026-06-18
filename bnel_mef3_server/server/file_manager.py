@@ -455,6 +455,22 @@ class FileManager:
                     error_message=str(e)
                 )
 
+    def get_number_of_segments(self, file_path):
+        """Returns the number of signal segments currently configured for a file.
+
+        Args:
+            file_path (str): Path to the MEF file.
+
+        Returns:
+            int: Number of segments, or 0 if the file is not open or no segment
+                size has been set.
+        """
+        with self._lock:
+            state = self._files.get(file_path)
+            if state is None:
+                return 0
+            return len(state.get('chunks', []))
+
     def list_open_files(self):
         """Lists all currently open MEF files.
 

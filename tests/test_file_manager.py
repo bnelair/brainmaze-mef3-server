@@ -148,6 +148,7 @@ def access_pattern(file_manager, file_path):
         # time.sleep(0.1)
 
 
+@pytest.mark.benchmark
 def test_with_prefetch_real_file(benchmark, mef3_file):
     """Benchmark the access pattern WITH prefetching on a REAL file."""
     # this is much faster than no-prefetch for data with 256 channels. If this is much slower, the test is probably using a few channels.
@@ -158,6 +159,7 @@ def test_with_prefetch_real_file(benchmark, mef3_file):
     fm.shutdown()
 
 
+@pytest.mark.benchmark
 def test_no_prefetch_real_file(benchmark, mef3_file):
     """Benchmark the access pattern WITHOUT prefetching on a REAL file."""
     fm = FileManager(n_prefetch=0, cache_capacity_multiplier=0)  # Prefetching is turned OFF
